@@ -1,32 +1,52 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  ## Project: Prompt Engineering Platform
+  一个 Prompt 工程化平台，支持调试提示词模板、多模型对比、效果评估与沉淀。
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  ## Tech Stack
+  - Frontend: React 18 + TypeScript + Vite + Ant Design 5.x
+  - Backend: Python 3.12.13 + FastAPI + SQLAlchemy (async) + Alembic
+  - Database: MySQL (utf8mb4)
+  - LLM: OpenAI / Claude / 通义千问 / 文心一言 / DeepSeek / Moonshot
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  ## Project Structure
+  - web/       — React 前端
+  - server/    — FastAPI 后端
+  - openspec/  — OpenSpec 规范管理
+
+  ## Conventions
+  - API 路径统一 /api/v1/ 前缀
+  - RESTful 风格 + SSE 流式输出
+  - 数据表统一 created_by / created_at / updated_at 字段
+  - 前端路径别名 @/ → ./src/
+  - 后端异步优先 (async/await)
+
+  ## Domain
+  Prompt 工程化：模板管理、多模型对比、五维度评估、版本管理、调试优化、测试体系
+
+rules:
+  proposal:
+    - 必须包含 "影响范围" 章节，列出受影响的数据库表和 API
+    - 必须标注所属 Phase (Phase 1-4)
+    - 如涉及 LLM 适配，必须列出受影响的模型供应商
+  tasks:
+    - 每个任务必须标注前端/后端/全栈
+    - 后端任务必须包含数据库迁移步骤（如涉及）
+    - 前端任务必须包含组件层级关系
+    - 单个任务预估不超过 2 小时
+  design:
+    - 必须包含数据模型设计（ER 图或表结构）
+    - 必须包含 API 接口定义
+    - 涉及 LLM 调用时必须包含流式处理方案
+
+operations:
+  apply:
+    guidance:
+      - 后端代码变更后必须运行 alembic check 验证迁移
+      - 前端代码变更后必须运行 tsc --noEmit 验证类型
+      - 新增 API 接口必须同步更新前端 API 层
+  archive:
+    guidance:
+      - 归档前确认所有测试通过
+      - 归档摘要中列出新增/变更的数据库表
