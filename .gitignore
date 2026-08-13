@@ -19,3 +19,7 @@ coverage/
 /node_modules
 /lib
 *.log
+
+# build output
+dist/
+dist-ssr/

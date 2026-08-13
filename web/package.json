@@ -1,0 +1,35 @@
+{
+  "name": "prompt-engineering-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vite",
+    "mock": "cross-env VITE_USE_MOCK=true vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "antd": "^5.20.0",
+    "@ant-design/icons": "^5.4.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "cross-env": "^7.0.3",
+    "mockjs": "^1.1.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-plugin-checker": "^0.7.2",
+    "vite-plugin-mock": "^3.0.2"
+  }
+}
