@@ -10,6 +10,7 @@
 | 2026-08-13 | 布局从侧边栏改为顶部水平导航；移除 SideBar、BreadcrumbNav；菜单按功能域分组 | Phase 1 |
 | 2026-08-13 | Login 页移除 AntD Card 改为自定义 div；Mock 账号提示仅 VITE_USE_MOCK 时显示 | Phase 1 |
 | 2026-08-13 | HeaderBar 用户头像从图片改为用户名首字母 + 渐变色背景 | Phase 1 |
+| 2026-08-13 | 新增 Setup、ResetPassword、UserManagement 页面 + PermissionRoute 权限路由 | Phase 1 |
 
 ---
 
@@ -18,7 +19,10 @@
 | 路由 | 页面 | Phase | 说明 |
 |------|------|-------|------|
 | `/login` | Login | 1 | 登录页（无需认证） |
+| `/setup` | Setup | 1 | 首次设置用户名和密码（temp_token） |
+| `/reset-password` | ResetPassword | 1 | 重置密码后设置新密码（temp_token） |
 | `/dashboard` | Dashboard | 1 | 工作台首页（需认证） |
+| `/users` | UserManagement | 1 | 用户管理（root/admin 权限） |
 | `/templates` | TemplateList | 1 | 模板列表（待实现） |
 | `/templates/new` | TemplateEditor | 1 | 新建模板（待实现） |
 | `/templates/:id/edit` | TemplateEditor | 1 | 编辑模板（待实现） |
@@ -53,8 +57,9 @@ MainLayout (Layout)
 │   │   │   ├── 对比实验 (/experiments, disabled)
 │   │   │   ├── 评估面板 (/evaluation, disabled)
 │   │   │   └── 用量看板 (/usage, disabled)
-│   │   └── 测试中心 ▾
-│   │       └── 测试用例 (/test-center, disabled)
+│   │   ├── 测试中心 ▾
+│   │   │   └── 测试用例 (/test-center, disabled)
+│   │   └── 用户管理 (/users, 仅 root/admin 可见)
 │   └── Dropdown (用户首字母头像 + 名字 + 退出)
 └── Content
     └── <Outlet /> (子路由渲染)
@@ -75,6 +80,54 @@ Login (Page)
         │   ├── Form.Item > Input.Password (password, prefix: LockOutlined, size: large)
         │   └── Button (submit, "登录", height: 48px, 渐变背景)
         └── div.login-tip (仅 VITE_USE_MOCK=true 时渲染 "Mock 账号：admin@prompt.dev / 123456")
+```
+
+### Setup（首次设置页）
+
+```
+Setup (Page, 无需认证, 使用 temp_token)
+└── div.setup-container (渐变背景)
+    └── div.setup-card
+        ├── div.setup-header (🚀 + "首次登录设置")
+        └── Form
+            ├── Form.Item > Input (username, prefix: UserOutlined)
+            ├── Form.Item > Input.Password (password, prefix: LockOutlined)
+            ├── Form.Item > Input.Password (confirmPassword)
+            └── Button (submit, "完成设置", 渐变背景)
+```
+
+### ResetPassword（重置密码页）
+
+```
+ResetPassword (Page, 无需认证, 使用 temp_token)
+└── div.reset-container (渐变背景)
+    └── div.reset-card
+        ├── div.reset-header (🔑 + "设置新密码")
+        └── Form
+            ├── Form.Item > Input.Password (newPassword, prefix: LockOutlined)
+            ├── Form.Item > Input.Password (confirmPassword)
+            └── Button (submit, "确认", 渐变背景)
+```
+
+### UserManagement（用户管理页）
+
+```
+UserManagement (Page, 需 root/admin 权限)
+├── div.page-header
+│   ├── h2 ("用户管理")
+│   └── Space
+│       ├── Button (刷新, ReloadOutlined)
+│       └── Button (创建用户, PlusOutlined, type: primary)
+├── Table
+│   ├── Column (邮箱)
+│   ├── Column (用户名, 未设置显示 Tag)
+│   ├── Column (角色, Select 下拉切换角色)
+│   ├── Column (状态, Tag 带颜色)
+│   ├── Column (创建时间)
+│   └── Column (操作: 重置密码 / 删除, Popconfirm 确认)
+└── Modal (创建用户)
+    └── Form
+        └── Form.Item > Input (邮箱)
 ```
 
 ### Dashboard（工作台首页）

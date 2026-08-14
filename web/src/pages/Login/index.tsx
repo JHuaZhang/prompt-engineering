@@ -20,12 +20,21 @@ export default function Login() {
   const handleSubmit = async (values: LoginDTO) => {
     setLoading(true);
     try {
-      await login(values);
-      message.success('登录成功');
-      const from = (location.state as LocationState)?.from?.pathname;
-      navigate(from ?? '/dashboard');
-    } catch {
-      message.error('邮箱或密码错误');
+      const result = await login(values);
+      if (result.code === 1001) {
+        message.info(result.message);
+        navigate('/setup');
+      } else if (result.code === 1002) {
+        message.info(result.message);
+        navigate('/reset-password');
+      } else {
+        message.success('登录成功');
+        const from = (location.state as LocationState)?.from?.pathname;
+        navigate(from ?? '/dashboard');
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '邮箱或密码错误';
+      message.error(msg);
     } finally {
       setLoading(false);
     }

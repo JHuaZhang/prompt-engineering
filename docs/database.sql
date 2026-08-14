@@ -7,6 +7,7 @@
 | 日期 | 变更内容 | 关联 Phase | 迁移脚本 |
 |------|---------|-----------|---------|
 | — | 文档初始化（Phase 1 表结构预定义） | — | — |
+| 2026-08-13 | 新增 users 表（从 Phase 4 提前到 Phase 1） | Phase 1 | 0001_create_users_table.py |
 
 ---
 
@@ -101,6 +102,25 @@ CREATE TABLE `execution_records` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
+### users
+
+```sql
+CREATE TABLE `users` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(128) NOT NULL,
+  `username` VARCHAR(64) DEFAULT NULL,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `role` ENUM('root','admin','user') NOT NULL DEFAULT 'user',
+  `status` ENUM('pending_setup','active','password_reset') NOT NULL DEFAULT 'pending_setup',
+  `created_by` VARCHAR(64) NOT NULL DEFAULT 'system',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_email` (`email`),
+  UNIQUE KEY `uk_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
 ---
 
 ## Phase 2 表结构
@@ -117,4 +137,4 @@ CREATE TABLE `execution_records` (
 
 ## Phase 4 表结构
 
-> 待 Phase 4 启动时补充：users、conversation_sessions、conversation_messages、prompt_chains
+> 待 Phase 4 启动时补充：conversation_sessions、conversation_messages、prompt_chains

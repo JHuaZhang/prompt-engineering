@@ -7,6 +7,10 @@ import path from 'node:path';
 export default defineConfig(({ mode }) => {
   const useMock = process.env.VITE_USE_MOCK === 'true';
 
+  // 开发环境后端地址（用于 proxy 代理）
+  const apiBaseUrl = process.env.VITE_API_BASE_URL || 'http://localhost:8000';
+  const apiPrefix = process.env.VITE_API_PREFIX || '/api/v1';
+
   return {
     plugins: [
       react(),
@@ -26,6 +30,12 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 5173,
+      proxy: {
+        [apiPrefix]: {
+          target: apiBaseUrl,
+          changeOrigin: true,
+        },
+      },
     },
   };
 });

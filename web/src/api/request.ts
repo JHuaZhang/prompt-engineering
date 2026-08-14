@@ -1,4 +1,17 @@
-const BASE_URL = '/api/v1';
+/**
+ * API 基础地址
+ *
+ * - 开发环境 (npm run dev): API_BASE_URL 为空，走 Vite proxy 代理
+ *   前端请求 /api/v1/auth/login → Vite proxy 转发到 http://localhost:8000/api/v1/auth/login
+ *
+ * - 生产环境 (npm run build): API_BASE_URL 来自 .env.production
+ *   前端请求 https://api.prompt.example.com/api/v1/auth/login
+ *
+ * - Mock 模式 (npm run mock): API_BASE_URL 为空，Vite mock 插件拦截同源请求
+ */
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const API_PREFIX = import.meta.env.VITE_API_PREFIX ?? '/api/v1';
+const BASE_URL = `${API_BASE_URL}${API_PREFIX}`;
 const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_RETRY = 3;
 const RETRY_DELAY = 1000;
@@ -122,4 +135,4 @@ export const http = {
     request<T>(url, { ...options, method: 'DELETE' }),
 };
 
-export { ApiError, type ApiResponse, type RequestOptions };
+export { ApiError, BASE_URL, type ApiResponse, type RequestOptions };

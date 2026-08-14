@@ -9,6 +9,7 @@
 | 2026-08-13 | 新增 auth 和 dashboard 共 5 个接口 | Phase 1 |
 | 2026-08-13 | UserVO.avatar 改为可选字段（头像改用用户名首字母） | Phase 1 |
 | 2026-08-13 | request.ts 新增重试机制（默认 3 次，指数退避，仅 5xx/网络错误重试） | Phase 1 |
+| 2026-08-13 | 新增认证增强（setup、reset-password）及用户管理接口 | Phase 1 |
 
 ---
 
@@ -18,7 +19,9 @@
 
 | 方法 | 路径 | 说明 | 请求体 | 响应 |
 |------|------|------|--------|------|
-| POST | `/auth/login` | 邮箱密码登录 | `LoginDTO` | `LoginResultVO` |
+| POST | `/auth/login` | 邮箱密码登录 | `LoginDTO` | `LoginResultVO` / `TempTokenVO` |
+| POST | `/auth/setup` | 首次设置用户名和密码 | `SetupDTO` | `LoginResultVO` |
+| POST | `/auth/reset-password` | 重置后设置新密码 | `ResetPasswordDTO` | `LoginResultVO` |
 | POST | `/auth/logout` | 登出 | — | `null` |
 | GET | `/auth/profile` | 获取当前用户信息 | — | `UserVO` |
 
@@ -31,16 +34,59 @@
 }
 ```
 
-#### LoginResultVO
+#### 登录响应（正常 active）
 
 ```json
 {
-  "token": "mock-jwt-token",
-  "user": {
-    "id": 1,
-    "email": "admin@prompt.dev",
-    "name": "Admin"
-  }
+  "code": 0,
+  "data": {
+    "token": "jwt-token",
+    "user": {
+      "id": 1,
+      "email": "admin@prompt.dev",
+      "username": "Admin",
+      "role": "root",
+      "status": "active"
+    }
+  },
+  "message": "success"
+}
+```
+
+#### 登录响应（pending_setup，code=1001）
+
+```json
+{
+  "code": 1001,
+  "data": { "temp_token": "temp-jwt-token" },
+  "message": "首次登录，请设置用户名和密码"
+}
+```
+
+#### 登录响应（password_reset，code=1002）
+
+```json
+{
+  "code": 1002,
+  "data": { "temp_token": "temp-jwt-token" },
+  "message": "密码已被重置，请设置新密码"
+}
+```
+
+#### SetupDTO
+
+```json
+{
+  "username": "张三",
+  "password": "newpassword"
+}
+```
+
+#### ResetPasswordDTO
+
+```json
+{
+  "new_password": "newpassword"
 }
 ```
 
@@ -50,12 +96,53 @@
 {
   "id": 1,
   "email": "admin@prompt.dev",
-  "name": "Admin",
-  "avatar": "(可选，当前未使用，头像由前端用用户名首字母生成)"
+  "username": "Admin",
+  "role": "root",
+  "status": "active"
 }
 ```
 
-> 认证请求头：除 `/auth/login` 外，所有接口需要 `Authorization: Bearer <token>` 头
+> 认证请求头：除 `/auth/login` 外，所有接口需要 `Authorization: Bearer <token>` 头。
+> `/auth/setup` 和 `/auth/reset-password` 需要使用 temp_token（登录时 code=1001/1002 返回的受限 token）。
+
+### 用户管理 — /api/v1/users
+
+| 方法 | 路径 | 说明 | 请求体 | 响应 | 权限 |
+|------|------|------|--------|------|------|
+| GET | `/users` | 用户列表 | — | `UserManageVO[]` | root/admin |
+| POST | `/users` | 创建用户（邮箱） | `CreateUserDTO` | `UserManageVO` | root/admin |
+| PUT | `/users/{id}/role` | 修改用户角色 | `UpdateRoleDTO` | `UserManageVO` | root/admin |
+| POST | `/users/{id}/reset-password` | 重置用户密码 | — | `null` | root/admin |
+| DELETE | `/users/{id}` | 删除用户 | — | `null` | root/admin |
+
+#### CreateUserDTO
+
+```json
+{ "email": "newuser@prompt.dev" }
+```
+
+#### UpdateRoleDTO
+
+```json
+{ "role": "admin" }
+```
+
+#### UserManageVO
+
+```json
+{
+  "id": 2,
+  "email": "user@prompt.dev",
+  "username": "用户名",
+  "role": "user",
+  "status": "active",
+  "created_at": "2026-08-13T12:00:00"
+}
+```
+
+> 创建用户后初始密码为 123456，用户状态为 pending_setup。
+> 重置密码后密码为 123456，用户状态为 password_reset。
+> admin 不能操作 root 用户和同级 admin 用户。
 
 ### 请求封装 — `src/api/request.ts`
 

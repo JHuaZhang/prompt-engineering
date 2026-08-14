@@ -14,48 +14,58 @@ const NAVIGABLE_KEYS = [
   '/dashboard', '/templates', '/templates/versions',
   '/debug', '/debug-wizard',
   '/experiments', '/evaluation', '/usage', '/test-center',
+  '/users',
 ];
 
-const menuItems: MenuItem[] = [
-  { key: '/dashboard', label: '工作台' },
-  {
-    key: 'templates-group',
-    label: '模板管理',
-    children: [
-      { key: '/templates', label: '模板列表' },
-      { key: '/templates/versions', label: '版本管理', disabled: true },
-    ],
-  },
-  {
-    key: 'debug-group',
-    label: '调试执行',
-    children: [
-      { key: '/debug', label: '即时调试' },
-      { key: '/debug-wizard', label: '调试向导', disabled: true },
-    ],
-  },
-  {
-    key: 'experiment-group',
-    label: '实验评估',
-    children: [
-      { key: '/experiments', label: '对比实验', disabled: true },
-      { key: '/evaluation', label: '评估面板', disabled: true },
-      { key: '/usage', label: '用量看板', disabled: true },
-    ],
-  },
-  {
-    key: 'test-group',
-    label: '测试中心',
-    children: [
-      { key: '/test-center', label: '测试用例', disabled: true },
-    ],
-  },
-];
+function getMenuItems(userRole: string | undefined): MenuItem[] {
+  const items: MenuItem[] = [
+    { key: '/dashboard', label: '工作台' },
+    {
+      key: 'templates-group',
+      label: '模板管理',
+      children: [
+        { key: '/templates', label: '模板列表' },
+        { key: '/templates/versions', label: '版本管理', disabled: true },
+      ],
+    },
+    {
+      key: 'debug-group',
+      label: '调试执行',
+      children: [
+        { key: '/debug', label: '即时调试' },
+        { key: '/debug-wizard', label: '调试向导', disabled: true },
+      ],
+    },
+    {
+      key: 'experiment-group',
+      label: '实验评估',
+      children: [
+        { key: '/experiments', label: '对比实验', disabled: true },
+        { key: '/evaluation', label: '评估面板', disabled: true },
+        { key: '/usage', label: '用量看板', disabled: true },
+      ],
+    },
+    {
+      key: 'test-group',
+      label: '测试中心',
+      children: [
+        { key: '/test-center', label: '测试用例', disabled: true },
+      ],
+    },
+  ];
+
+  if (userRole === 'root' || userRole === 'admin') {
+    items.push({ key: '/users', label: '用户管理' });
+  }
+
+  return items;
+}
 
 export default function HeaderBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
+  const menuItems = getMenuItems(user?.role);
 
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
     if (NAVIGABLE_KEYS.includes(key)) {
@@ -83,7 +93,8 @@ export default function HeaderBar() {
     },
   ];
 
-  const initial = (user?.name ?? 'U').charAt(0).toUpperCase();
+  const displayName = user?.username ?? user?.email ?? '用户';
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <Header
@@ -121,7 +132,7 @@ export default function HeaderBar() {
           >
             {initial}
           </Avatar>
-          <Text>{user?.name ?? '用户'}</Text>
+          <Text>{displayName}</Text>
         </Space>
       </Dropdown>
     </Header>
