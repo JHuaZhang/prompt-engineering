@@ -24,3 +24,6 @@ coverage/
 dist/
 dist-ssr/
 .vite/
+
+.codefuse/
+.venv/
